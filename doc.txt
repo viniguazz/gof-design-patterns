@@ -1,0 +1,89 @@
+
+
+Desing Patterns (GOF)
+
+- total of 23 patterns
+
+
+1) pattern types
+
+a) creational: provide flexibility in how the objects are actually created 
+b) structural: deal with how inheritance and composition can be used to provide extra functionality
+c) behavioral: are about communication and assignment of responsabilities between our objects
+
+
+2) patterns
+
+2.1) singleton (creational): only one instance of its kind exists; provides only one point of access to it.
+
+ex: um país só tem um presidente
+
+Look like global variables (can be accessed from any part of our code).
+
+Caso de uso: instância de banco de dados (só é necessário um).
+
+
+// exemplo em Java
+public class Singleton {
+
+	private static Singleton instance;
+	private String data;
+	
+	private Singleton(String data) {
+		this.data = data;
+	}
+	
+	public static Singleton getInstance(String data) {
+		if (instance == null) {
+			instance = new Singleton(data);
+		}
+		return instance;
+	}
+}
+
+A implementação acima não é thread-safe. A de baixo sim:
+
+public class Singleton {
+
+	private static Singleton instance;
+	private String data;
+	
+	private Singleton(String data) {
+		this.data = data;
+	}
+	
+	public static Singleton getInstance(String data) {
+		synchronized (Singleton.class) {
+			if (instance == null) {
+				instance = new Singleton(data);
+			}
+		}
+		return instance;
+	}
+}
+
+Isso faz o código trancar um poucos. Solução: double-checked locking idiom (assim, limitamos a questão da sincronização para os casos raros de construção de uma nova instance, pulando a sincronização quando uma instance já criada está sendo acessada).
+
+
+public class Singleton {
+
+	private static Singleton instance;
+	private String data;
+	
+	private Singleton(String data) {
+		this.data = data;
+	}
+	
+	public static Singleton getInstance(String data) {
+		if (instance == null) {
+			synchronized (Singleton.class) {
+				if (instance == null) {
+					instance = new Singleton(data);
+				}
+			}
+		}
+		return instance;
+	}
+}
+
+Mas esse código tem um problema adicional: algumas linguagens permitem a referência de objetos incompletos (partially constructed object). Assim, ainda que a criação do objeto não esteja completa, outras threads podem estar acessando esse objeto criado pela metade.
